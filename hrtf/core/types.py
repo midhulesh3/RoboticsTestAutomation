@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Literal
+from pathlib import Path
 
 class Verdict(str, Enum):
     PASS = "PASS"
@@ -34,6 +35,38 @@ class DisturbanceProfile:
 class InitialConditions:
     pose: Pose
     joint_positions: dict[str, float] = field(default_factory=dict)
+
+@dataclass
+class ValidationDiagnostic:
+    severity: Literal["error", "warning"]
+    element: str
+    line_number: int | None
+    message: str
+    suggestion: str
+
+@dataclass
+class JointInfo:
+    name: str
+    type: str
+
+@dataclass
+class LinkInfo:
+    name: str
+    mass: float
+
+@dataclass
+class RobotModel:
+    name: str
+    urdf_path: Path
+    urdf_hash: str
+    format: Literal["urdf", "sdf"]
+    joints: list[JointInfo]
+    links: list[LinkInfo]
+    joint_limits: dict[str, JointLimits]
+
+    def with_overrides(self, overrides: dict) -> "RobotModel":
+        # Simplified for now
+        return self
 
 @dataclass
 class SignalSummary:
