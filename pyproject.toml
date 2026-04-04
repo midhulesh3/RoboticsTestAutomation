@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hrtf"
+version = "0.1.0"
+description = "Humanoid Robot Test Framework"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "click",
+    "pyyaml",
+    "jsonschema",
+    "numpy",
+]
+
+[project.scripts]
+hrtf = "hrtf.cli.main:cli"
+
+[project.entry-points."hrtf.adapters"]
+gazebo = "hrtf.adapters.gazebo:GazeboHarmonicAdapter"
+mujoco = "hrtf.adapters.mujoco:MuJoCoAdapter"
+
+[project.entry-points."hrtf.assertions"]
