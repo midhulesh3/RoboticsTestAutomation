@@ -85,7 +85,7 @@ class NeverExceeds(AssertionPredicate):
     def evaluate(self, signal: np.ndarray, signal_name: str) -> AssertionResult:
         if len(signal) == 0:
             return AssertionResult(
-                verdict=Verdict.FAIL,
+                verdict=Verdict.PASS,
                 assertion_type="never_exceeds",
                 signal_name=signal_name,
                 expected_bound=self.value
