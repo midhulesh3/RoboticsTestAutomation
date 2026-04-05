@@ -1,0 +1,8 @@
+run_settings:
+  name: "MuJoCo — High Fidelity"
+  description: "Smaller timestep for higher accuracy physics at the cost of speed"
+  simulator:
+    backend: "mujoco"
+    seed: 42
+    step_size: 0.0005
+    real_time_factor: 0.0

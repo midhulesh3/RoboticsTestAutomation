@@ -1,0 +1,31 @@
+hrtf_version: "1.0"
+scenario:
+  name: "SC-03: Flat-Ground Gait — 5m Walk"
+  description: "Robot must walk 5m within 12s; no fall; all joint torques within rated limits"
+  robot:
+    model: "../models/simple_biped.urdf"
+  simulator:
+    backend: "mujoco"
+    seed: 42
+    step_size: 0.002
+    real_time_factor: 0.0
+  initial_conditions:
+    pose:
+      position: [0.0, 0.0, 1.0]
+      orientation: [0.0, 0.0, 0.0, 1.0]
+  disturbance: []
+  duration: 12.0
+  assertions:
+    - type: "always_above"
+      signal: "/com_height"
+      value: 0.05
+      window: [0.0, 12.0]
+    - type: "never_exceeds"
+      signal: "/com_height"
+      value: 3.0
+      window: [0.0, 12.0]
+  metadata:
+    author: "hrtf"
+    category: "locomotion"
+    canonical_id: "SC-03"
+    note: "Requires a walking controller to fully pass the 5m distance criterion"

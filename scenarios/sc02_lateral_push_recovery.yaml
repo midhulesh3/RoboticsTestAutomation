@@ -1,0 +1,35 @@
+hrtf_version: "1.0"
+scenario:
+  name: "SC-02: Lateral Push Recovery"
+  description: "CoM height must remain above 0.05m for 10s after 50N lateral impulse (200ms)"
+  robot:
+    model: "../models/simple_biped.urdf"
+  simulator:
+    backend: "mujoco"
+    seed: 42
+    step_size: 0.002
+    real_time_factor: 0.0
+  initial_conditions:
+    pose:
+      position: [0.0, 0.0, 1.0]
+      orientation: [0.0, 0.0, 0.0, 1.0]
+  disturbance:
+    - type: "impulse"
+      time: 2.0
+      force: [50.0, 0.0, 0.0]
+      duration: 0.2
+      link: "base_link"
+  duration: 12.0
+  assertions:
+    - type: "always_above"
+      signal: "/com_height"
+      value: 0.05
+      window: [2.0, 12.0]
+    - type: "never_exceeds"
+      signal: "/com_height"
+      value: 3.0
+      window: [0.0, 12.0]
+  metadata:
+    author: "hrtf"
+    category: "recovery"
+    canonical_id: "SC-02"

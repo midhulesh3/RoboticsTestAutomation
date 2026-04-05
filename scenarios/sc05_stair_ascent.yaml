@@ -1,0 +1,31 @@
+hrtf_version: "1.0"
+scenario:
+  name: "SC-05: Stair Ascent — 3 Steps"
+  description: "Robot CoM height must increase monotonically over stairs; task completes within 20s; no fall"
+  robot:
+    model: "../models/simple_biped.urdf"
+  simulator:
+    backend: "mujoco"
+    seed: 42
+    step_size: 0.002
+    real_time_factor: 0.0
+  initial_conditions:
+    pose:
+      position: [0.0, 0.0, 1.0]
+      orientation: [0.0, 0.0, 0.0, 1.0]
+  disturbance: []
+  duration: 20.0
+  assertions:
+    - type: "always_above"
+      signal: "/com_height"
+      value: 0.05
+      window: [0.0, 20.0]
+    - type: "never_exceeds"
+      signal: "/com_height"
+      value: 5.0
+      window: [0.0, 20.0]
+  metadata:
+    author: "hrtf"
+    category: "locomotion"
+    canonical_id: "SC-05"
+    note: "Full stair ascent requires stair terrain in MJCF and a stair-climbing controller"

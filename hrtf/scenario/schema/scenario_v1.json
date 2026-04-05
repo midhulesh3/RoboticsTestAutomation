@@ -7,20 +7,119 @@
             "type": "object",
             "required": ["name", "robot"],
             "properties": {
-                "name": { "type": "string" },
+                "name": { "type": "string", "minLength": 1 },
                 "description": { "type": "string" },
                 "robot": {
                     "type": "object",
                     "required": ["model"],
                     "properties": {
-                        "model": { "type": "string" }
+                        "model": { "type": "string", "minLength": 1 }
+                    },
+                    "additionalProperties": false
+                },
+                "simulator": {
+                    "type": "object",
+                    "properties": {
+                        "backend": {
+                            "type": "string",
+                            "enum": ["gazebo", "mujoco", "isaac_sim"]
+                        },
+                        "seed": { "type": "integer" },
+                        "step_size": { "type": "number", "exclusiveMinimum": 0 },
+                        "real_time_factor": { "type": "number", "minimum": 0 }
+                    },
+                    "additionalProperties": false
+                },
+                "initial_conditions": {
+                    "type": "object",
+                    "properties": {
+                        "pose": {
+                            "type": "object",
+                            "properties": {
+                                "position": {
+                                    "type": "array",
+                                    "items": { "type": "number" },
+                                    "minItems": 3,
+                                    "maxItems": 3
+                                },
+                                "orientation": {
+                                    "type": "array",
+                                    "items": { "type": "number" },
+                                    "minItems": 4,
+                                    "maxItems": 4
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "joint_positions": {
+                            "type": "object",
+                            "additionalProperties": { "type": "number" }
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "duration": { "type": "number", "exclusiveMinimum": 0 },
+                "disturbance": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["type", "time"],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": ["impulse", "static_load", "sinusoidal"]
+                            },
+                            "time": { "type": "number", "minimum": 0 },
+                            "force": {
+                                "type": "array",
+                                "items": { "type": "number" },
+                                "minItems": 3,
+                                "maxItems": 3
+                            },
+                            "duration": { "type": "number", "exclusiveMinimum": 0 },
+                            "mass": { "type": "number", "exclusiveMinimum": 0 },
+                            "link": { "type": "string" }
+                        },
+                        "additionalProperties": false
                     }
                 },
-                "simulator": { "type": "object" },
-                "initial_conditions": { "type": "object" },
-                "duration": { "type": "number" },
-                "assertions": { "type": "array" }
-            }
+                "assertions": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["type"],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": ["always_above", "never_exceeds", "reaches_within", "stabilises_within", "compound"]
+                            },
+                            "signal": { "type": "string" },
+                            "value": { "type": "number" },
+                            "window": {
+                                "type": "array",
+                                "items": { "type": "number" },
+                                "minItems": 2,
+                                "maxItems": 2
+                            },
+                            "tolerance": { "type": "number", "exclusiveMinimum": 0 },
+                            "operator": {
+                                "type": "string",
+                                "enum": ["and", "or"]
+                            },
+                            "children": {
+                                "type": "array",
+                                "items": { "$ref": "#/properties/scenario/properties/assertions/items" }
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": { "type": "string" }
+                }
+            },
+            "additionalProperties": false
         }
     },
     "required": ["scenario"]

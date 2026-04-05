@@ -1,0 +1,34 @@
+hrtf_version: "1.0"
+scenario:
+  name: "SC-01: Static Balance"
+  description: "CoM height must remain above 0.05m and ZMP within support polygon for 5s with no disturbance"
+  robot:
+    model: "../models/simple_biped.urdf"
+  simulator:
+    backend: "mujoco"
+    seed: 42
+    step_size: 0.002
+    real_time_factor: 0.0
+  initial_conditions:
+    pose:
+      position: [0.0, 0.0, 1.0]
+      orientation: [0.0, 0.0, 0.0, 1.0]
+  disturbance: []
+  duration: 5.0
+  assertions:
+    - type: "always_above"
+      signal: "/com_height"
+      value: 0.05
+      window: [0.0, 5.0]
+    - type: "never_exceeds"
+      signal: "/com_height"
+      value: 2.0
+      window: [0.0, 5.0]
+    - type: "stabilises_within"
+      signal: "/com_height"
+      tolerance: 0.05
+      window: [2.0, 5.0]
+  metadata:
+    author: "hrtf"
+    category: "balance"
+    canonical_id: "SC-01"

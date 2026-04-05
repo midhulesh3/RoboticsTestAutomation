@@ -1,0 +1,10 @@
+fixture:
+  name: "Simple Biped — Standing"
+  description: "A 6-DOF biped with two legs, spawned upright at 1m height on flat ground"
+  robot:
+    model: "models/simple_biped.urdf"
+  initial_conditions:
+    pose:
+      position: [0.0, 0.0, 1.0]
+      orientation: [0.0, 0.0, 0.0, 1.0]
+    joint_positions: {}

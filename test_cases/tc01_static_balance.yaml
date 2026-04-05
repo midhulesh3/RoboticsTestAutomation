@@ -1,0 +1,23 @@
+test_case:
+  name: "TC-01: Static Balance"
+  description: "CoM height must stay above threshold with no external disturbance"
+  fixture: "simple_biped_standing"
+  disturbance: []
+  duration: 5.0
+  assertions:
+    - type: "always_above"
+      signal: "/com_height"
+      value: 0.05
+      window: [0.0, 5.0]
+    - type: "never_exceeds"
+      signal: "/com_height"
+      value: 2.0
+      window: [0.0, 5.0]
+    - type: "stabilises_within"
+      signal: "/com_height"
+      tolerance: 0.05
+      window: [2.0, 5.0]
+  metadata:
+    author: "hrtf"
+    category: "balance"
+    canonical_id: "SC-01"

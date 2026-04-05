@@ -1,0 +1,16 @@
+test_case:
+  name: "TC-09: Object Grasp — Cylindrical, 1kg"
+  description: "Grasp success within 5s; object not dropped for 10s; wrist force within limits"
+  fixture: "simple_biped_standing"
+  disturbance: []
+  duration: 15.0
+  assertions:
+    - type: "always_above"
+      signal: "/com_height"
+      value: 0.05
+      window: [0.0, 15.0]
+  metadata:
+    author: "hrtf"
+    category: "manipulation"
+    canonical_id: "SC-09"
+    note: "Requires humanoid model with arms/gripper and grasp event signals"

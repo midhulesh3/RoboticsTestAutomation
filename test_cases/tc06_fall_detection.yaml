@@ -1,0 +1,21 @@
+test_case:
+  name: "TC-06: Fall Detection and E-Stop"
+  description: "When CoM drops below threshold, verify the fall is detected"
+  fixture: "simple_biped_standing"
+  disturbance:
+    - type: "impulse"
+      time: 1.0
+      force: [200.0, 0.0, 0.0]
+      duration: 0.5
+      link: "base_link"
+  duration: 5.0
+  assertions:
+    - type: "always_above"
+      signal: "/com_height"
+      value: 0.0
+      window: [0.0, 5.0]
+  metadata:
+    author: "hrtf"
+    category: "safety"
+    canonical_id: "SC-06"
+    note: "Full e-stop latency assertion requires event_occurs predicate"

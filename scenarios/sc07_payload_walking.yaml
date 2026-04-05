@@ -1,0 +1,35 @@
+hrtf_version: "1.0"
+scenario:
+  name: "SC-07: Payload Walking — 5kg"
+  description: "Same as SC-03 with 5kg payload attached; torque headroom must remain above 10%"
+  robot:
+    model: "../models/simple_biped.urdf"
+  simulator:
+    backend: "mujoco"
+    seed: 42
+    step_size: 0.002
+    real_time_factor: 0.0
+  initial_conditions:
+    pose:
+      position: [0.0, 0.0, 1.0]
+      orientation: [0.0, 0.0, 0.0, 1.0]
+  disturbance:
+    - type: "static_load"
+      time: 0.0
+      mass: 5.0
+      link: "base_link"
+  duration: 12.0
+  assertions:
+    - type: "always_above"
+      signal: "/com_height"
+      value: 0.05
+      window: [0.0, 12.0]
+    - type: "never_exceeds"
+      signal: "/com_height"
+      value: 3.0
+      window: [0.0, 12.0]
+  metadata:
+    author: "hrtf"
+    category: "locomotion"
+    canonical_id: "SC-07"
+    note: "Full test requires walking controller and per-joint torque headroom checks"
