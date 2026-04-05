@@ -9,16 +9,16 @@ The MVP has been initialized and core execution logic has been implemented.
 4. Implemented `ReachesWithin` and `StabilisesWithin` assertions.
 5. Implemented `hrtf init` command to bootstrap scenarios.
 
-**Remaining Tasks for MVP / Next Session:**
+**MVP Complete**
 
-1. **Baseline Manager (`hrtf/baselines/`)**
-   - Implement logic to capture a successful `RunResult` and store it as a baseline (JSON).
-   - Implement baseline comparison (computing % delta for signal summaries and failing on tolerance violations).
-   - Connect to `hrtf baseline capture` and `hrtf baseline compare` CLI commands.
-2. **Reporting Generation (`hrtf/reporting/`)**
-   - Implement `ReportGenerator` to convert `RunResult` JSON into HTML plots (using `matplotlib`).
-   - Connect to the `hrtf report` CLI command.
-3. **Compound Assertions (`hrtf/assertions/compound.py`)**
-   - Implement the `CompoundAssertion` class (AND/OR logic for multiple predicates).
-4. **Enhanced YAML validation**
-   - Expand `hrtf/scenario/parser.py` to utilize `jsonschema` with the published `scenario_v1.json` schema.
+All core features for the MVP have been implemented:
+- **Baseline Manager**: Captures and compares run results to track regressions.
+- **Reporting Generation**: Generates HTML reports with matplotlib plots.
+- **Compound Assertions**: Supports AND/OR combinations of assertion predicates.
+- **Enhanced YAML Validation**: Uses jsonschema to validate scenario files.
+
+**Remaining Tasks for Phase 2 / v1.0 Product:**
+- Implement Isaac Sim adapter.
+- Add support for custom assertion entry points.
+- Implement fleet-level baseline aggregation.
+- Add support for named test suites.

@@ -1,5 +1,7 @@
 import yaml
 import hashlib
+import json
+import jsonschema
 from pathlib import Path
 from hrtf.core.types import (
     ScenarioConfig,
@@ -12,8 +14,13 @@ from hrtf.core.exceptions import HRTFScenarioError
 
 class ScenarioParser:
     def __init__(self):
-        # We'll skip strict jsonschema validation for now and rely on manual basic checking
-        pass
+        schema_path = Path(__file__).parent / "schema" / "scenario_v1.json"
+        if schema_path.exists():
+            self._schema = json.loads(schema_path.read_text())
+            self._validator = jsonschema.Draft7Validator(self._schema)
+        else:
+            self._schema = None
+            self._validator = None
 
     def parse(self, path: str | Path, param_overrides: dict[str, str] | None = None) -> ScenarioConfig:
         path = Path(path)
@@ -25,6 +32,14 @@ class ScenarioParser:
             data = yaml.safe_load(content)
         except yaml.YAMLError as e:
             raise HRTFScenarioError(f"Invalid YAML in {path}: {e}", file_path=path)
+
+        if self._validator:
+            errors = sorted(self._validator.iter_errors(data), key=lambda e: e.path)
+            if errors:
+                # Just take the first error for simplicity
+                error = errors[0]
+                path_str = ".".join(str(p) for p in error.path)
+                raise HRTFScenarioError(f"Schema validation failed at '{path_str}': {error.message}", file_path=path)
 
         if "scenario" not in data:
             raise HRTFScenarioError("Missing 'scenario' root key", file_path=path)
