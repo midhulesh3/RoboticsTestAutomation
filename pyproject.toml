@@ -16,6 +16,7 @@ dependencies = [
     "mujoco",
     "pyarrow",
     "matplotlib",
+    "streamlit",
 ]
 
 [project.scripts]
