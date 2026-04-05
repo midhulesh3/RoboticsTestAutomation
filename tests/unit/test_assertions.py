@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from hrtf.assertions.predicates import AlwaysAbove, NeverExceeds
+from hrtf.assertions.predicates import AlwaysAbove, NeverExceeds, ReachesWithin, StabilisesWithin
 from hrtf.core.types import Verdict
 
 def test_always_above_pass():
@@ -64,3 +64,58 @@ def test_never_exceeds_fail():
     assert result.first_violation_time == 2.0
     assert result.violation_value == 30.0
     assert result.expected_bound == 25.0
+
+def test_reaches_within_pass():
+    signal = np.array([
+        [0.0, 1.0],
+        [1.0, 1.5],
+        [2.0, 1.98],
+        [3.0, 2.0]
+    ])
+
+    assertion = ReachesWithin(value=2.0, window=(0.0, 3.0), tolerance=0.05)
+    result = assertion.evaluate(signal, "test_signal")
+
+    assert result.verdict == Verdict.PASS
+
+def test_reaches_within_fail():
+    signal = np.array([
+        [0.0, 1.0],
+        [1.0, 1.5],
+        [2.0, 1.8],
+        [3.0, 1.8]
+    ])
+
+    assertion = ReachesWithin(value=2.0, window=(0.0, 3.0), tolerance=0.05)
+    result = assertion.evaluate(signal, "test_signal")
+
+    assert result.verdict == Verdict.FAIL
+
+def test_stabilises_within_pass():
+    signal = np.array([
+        [0.0, 1.0],
+        [1.0, 1.5],
+        [2.0, 1.51],
+        [2.5, 1.50],
+        [3.0, 1.52]
+    ])
+
+    # tolerance of 0.1 -> var < 0.01. The last 3 points have var ~= 0.00006
+    assertion = StabilisesWithin(tolerance=0.1, window=(0.0, 3.0), moving_window_size=1.0)
+    result = assertion.evaluate(signal, "test_signal")
+
+    assert result.verdict == Verdict.PASS
+
+def test_stabilises_within_fail():
+    signal = np.array([
+        [0.0, 1.0],
+        [1.0, 2.0],
+        [2.0, 0.0],
+        [2.5, 2.0],
+        [3.0, 0.0]
+    ])
+
+    assertion = StabilisesWithin(tolerance=0.1, window=(0.0, 3.0), moving_window_size=1.0)
+    result = assertion.evaluate(signal, "test_signal")
+
+    assert result.verdict == Verdict.FAIL
