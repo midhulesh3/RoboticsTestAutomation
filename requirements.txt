@@ -15,7 +15,6 @@ gitdb==4.0.12
 GitPython==3.1.46
 glfw==2.10.0
 greenlet==3.3.2
--e git+https://github.com/midhulesh3/RoboticsTestAutomation@2b529bd6228a09ba36b9d78dbce4ea5792307dff#egg=hrtf
 idna==3.11
 iniconfig==2.3.0
 Jinja2==3.1.6
