@@ -24,15 +24,23 @@ class ExecutionOrchestrator:
         self.assertion_engine = AssertionEngine()
 
     def run_scenario(self, scenario_path: Path, param_overrides: dict[str, str] | None = None) -> ScenarioResult:
+        """Run from a monolithic scenario YAML file."""
+        config = self.parser.parse(scenario_path, param_overrides)
+        return self._execute(config, scenario_path.parent)
+
+    def run_composed(self, config: ScenarioConfig) -> ScenarioResult:
+        """Run from a pre-composed ScenarioConfig (fixture + test case + run settings)."""
+        # For composed configs, robot paths are relative to the project root
+        return self._execute(config, Path("."))
+
+    def _execute(self, config: ScenarioConfig, base_dir: Path) -> ScenarioResult:
         start_time = time.time()
 
         try:
-            config = self.parser.parse(scenario_path, param_overrides)
-
-            # Use real paths if absolute, else relative to scenario
+            # Use real paths if absolute, else relative to base_dir
             urdf_path = config.robot_source
             if not Path(urdf_path).is_absolute() and "test_robot" not in urdf_path:
-                 urdf_path = scenario_path.parent / urdf_path
+                 urdf_path = base_dir / urdf_path
 
             robot_model = self.loader.load(urdf_path)
 
@@ -66,7 +74,7 @@ class ExecutionOrchestrator:
 
             return ScenarioResult(
                 scenario_name=config.name,
-                scenario_source=str(scenario_path),
+                scenario_source=config.source_path,
                 scenario_hash=config.source_hash,
                 verdict=verdict,
                 sim_duration=config.duration,
@@ -77,8 +85,8 @@ class ExecutionOrchestrator:
 
         except Exception as e:
             return ScenarioResult(
-                scenario_name=str(scenario_path.name),
-                scenario_source=str(scenario_path),
+                scenario_name=config.name if config else str(base_dir),
+                scenario_source=config.source_path if config else "",
                 scenario_hash="",
                 verdict=Verdict.ERROR,
                 sim_duration=0.0,

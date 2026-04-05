@@ -1,0 +1,24 @@
+test_case:
+  name: "TC-02: Lateral Push Recovery"
+  description: "CoM height must remain above threshold for 10s after 50N lateral impulse"
+  fixture: "simple_biped_standing"
+  disturbance:
+    - type: "impulse"
+      time: 2.0
+      force: [50.0, 0.0, 0.0]
+      duration: 0.2
+      link: "base_link"
+  duration: 12.0
+  assertions:
+    - type: "always_above"
+      signal: "/com_height"
+      value: 0.05
+      window: [2.0, 12.0]
+    - type: "never_exceeds"
+      signal: "/com_height"
+      value: 3.0
+      window: [0.0, 12.0]
+  metadata:
+    author: "hrtf"
+    category: "recovery"
+    canonical_id: "SC-02"

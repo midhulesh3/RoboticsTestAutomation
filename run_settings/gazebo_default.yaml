@@ -1,0 +1,8 @@
+run_settings:
+  name: "Gazebo Harmonic — Default"
+  description: "Standard Gazebo Harmonic settings via ROS 2 bridge"
+  simulator:
+    backend: "gazebo"
+    seed: 42
+    step_size: 0.001
+    real_time_factor: 0.0

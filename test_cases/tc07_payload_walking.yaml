@@ -1,0 +1,23 @@
+test_case:
+  name: "TC-07: Payload Walking — 5kg"
+  description: "Same as TC-03 with 5kg payload; torque headroom must remain above 10%"
+  fixture: "simple_biped_standing"
+  disturbance:
+    - type: "static_load"
+      time: 0.0
+      mass: 5.0
+      link: "base_link"
+  duration: 12.0
+  assertions:
+    - type: "always_above"
+      signal: "/com_height"
+      value: 0.05
+      window: [0.0, 12.0]
+    - type: "never_exceeds"
+      signal: "/com_height"
+      value: 3.0
+      window: [0.0, 12.0]
+  metadata:
+    author: "hrtf"
+    category: "locomotion"
+    canonical_id: "SC-07"

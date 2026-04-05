@@ -1,0 +1,10 @@
+fixture:
+  name: "Single Block — Elevated"
+  description: "A 5kg block placed at 2m height for freefall and physics validation tests"
+  robot:
+    model: "models/single_link.urdf"
+  initial_conditions:
+    pose:
+      position: [0.0, 0.0, 2.0]
+      orientation: [0.0, 0.0, 0.0, 1.0]
+    joint_positions: {}

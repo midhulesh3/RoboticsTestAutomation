@@ -22,6 +22,29 @@ class ScenarioParser:
             self._schema = None
             self._validator = None
 
+    @staticmethod
+    def _apply_override(data: dict, dotted_key: str, value: str) -> None:
+        """Apply a dotted key override (e.g. 'simulator.seed' -> '99') into nested dict."""
+        keys = dotted_key.split(".")
+        target = data
+        for key in keys[:-1]:
+            if key not in target or not isinstance(target[key], dict):
+                target[key] = {}
+            target = target[key]
+
+        # Attempt to cast to the original type if the key already exists
+        final_key = keys[-1]
+        if final_key in target:
+            original = target[final_key]
+            if isinstance(original, int):
+                value = int(value)
+            elif isinstance(original, float):
+                value = float(value)
+            elif isinstance(original, bool):
+                value = value.lower() in ("true", "1", "yes")
+
+        target[final_key] = value
+
     def parse(self, path: str | Path, param_overrides: dict[str, str] | None = None) -> ScenarioConfig:
         path = Path(path)
         if not path.exists():
@@ -45,6 +68,11 @@ class ScenarioParser:
             raise HRTFScenarioError("Missing 'scenario' root key", file_path=path)
 
         scenario_data = data["scenario"]
+
+        # Apply CLI parameter overrides (SA-04)
+        if param_overrides:
+            for key, value in param_overrides.items():
+                self._apply_override(scenario_data, key, value)
 
         # Hash the source content
         source_hash = hashlib.sha256(content.encode('utf-8')).hexdigest()

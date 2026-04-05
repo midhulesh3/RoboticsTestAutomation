@@ -1,0 +1,14 @@
+fixture:
+  name: "Simple Biped — Crouched"
+  description: "A 6-DOF biped with bent knees, simulating a crouched start position"
+  robot:
+    model: "models/simple_biped.urdf"
+  initial_conditions:
+    pose:
+      position: [0.0, 0.0, 1.0]
+      orientation: [0.0, 0.0, 0.0, 1.0]
+    joint_positions:
+      left_hip_pitch: -0.3
+      left_knee: 0.6
+      right_hip_pitch: -0.3
+      right_knee: 0.6

@@ -1,0 +1,20 @@
+test_case:
+  name: "TC-05: Stair Ascent — 3 Steps"
+  description: "Robot CoM height must increase monotonically; task completes within 20s; no fall"
+  fixture: "simple_biped_standing"
+  disturbance: []
+  duration: 20.0
+  assertions:
+    - type: "always_above"
+      signal: "/com_height"
+      value: 0.05
+      window: [0.0, 20.0]
+    - type: "never_exceeds"
+      signal: "/com_height"
+      value: 5.0
+      window: [0.0, 20.0]
+  metadata:
+    author: "hrtf"
+    category: "locomotion"
+    canonical_id: "SC-05"
+    note: "Full stair ascent requires stair terrain and a stair-climbing controller"

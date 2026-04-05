@@ -1,0 +1,32 @@
+hrtf_version: "1.0"
+scenario:
+  name: "SC-06: Fall Detection and E-Stop"
+  description: "When CoM drops below 0.1m, verify the fall is detected. Tests safety monitoring."
+  robot:
+    model: "../models/simple_biped.urdf"
+  simulator:
+    backend: "mujoco"
+    seed: 42
+    step_size: 0.002
+    real_time_factor: 0.0
+  initial_conditions:
+    pose:
+      position: [0.0, 0.0, 1.0]
+      orientation: [0.0, 0.0, 0.0, 1.0]
+  disturbance:
+    - type: "impulse"
+      time: 1.0
+      force: [200.0, 0.0, 0.0]
+      duration: 0.5
+      link: "base_link"
+  duration: 5.0
+  assertions:
+    - type: "always_above"
+      signal: "/com_height"
+      value: 0.0
+      window: [0.0, 5.0]
+  metadata:
+    author: "hrtf"
+    category: "safety"
+    canonical_id: "SC-06"
+    note: "Full e-stop latency assertion requires event_occurs predicate and e-stop signal"

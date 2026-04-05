@@ -1,0 +1,20 @@
+test_case:
+  name: "TC-08: Slope Ascent — 10 Degrees"
+  description: "Robot walks 5m up 10-degree incline without fall; completes within 15s"
+  fixture: "simple_biped_standing"
+  disturbance: []
+  duration: 15.0
+  assertions:
+    - type: "always_above"
+      signal: "/com_height"
+      value: 0.05
+      window: [0.0, 15.0]
+    - type: "never_exceeds"
+      signal: "/com_height"
+      value: 5.0
+      window: [0.0, 15.0]
+  metadata:
+    author: "hrtf"
+    category: "locomotion"
+    canonical_id: "SC-08"
+    note: "Full test requires sloped terrain and a walking controller"

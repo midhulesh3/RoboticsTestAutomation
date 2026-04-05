@@ -1,0 +1,27 @@
+hrtf_version: "1.0"
+scenario:
+  name: "SC-09: Object Grasp — Cylindrical, 1kg"
+  description: "Grasp success within 5s; object not dropped for 10s; wrist force within limits"
+  robot:
+    model: "../models/simple_biped.urdf"
+  simulator:
+    backend: "mujoco"
+    seed: 42
+    step_size: 0.002
+    real_time_factor: 0.0
+  initial_conditions:
+    pose:
+      position: [0.0, 0.0, 1.0]
+      orientation: [0.0, 0.0, 0.0, 1.0]
+  disturbance: []
+  duration: 15.0
+  assertions:
+    - type: "always_above"
+      signal: "/com_height"
+      value: 0.05
+      window: [0.0, 15.0]
+  metadata:
+    author: "hrtf"
+    category: "manipulation"
+    canonical_id: "SC-09"
+    note: "Requires humanoid model with arms/gripper and grasp event signals"
