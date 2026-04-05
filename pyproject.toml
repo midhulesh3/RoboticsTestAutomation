@@ -13,7 +13,7 @@ dependencies = [
     "pyyaml",
     "jsonschema",
     "numpy",
-    "mujoco",
+    "mujoco; python_version < '3.14'",
     "pyarrow",
     "matplotlib",
     "streamlit",

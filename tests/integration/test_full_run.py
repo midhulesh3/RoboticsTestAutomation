@@ -1,3 +1,9 @@
+try:
+    import mujoco
+    HAS_MUJOCO = True
+except ImportError:
+    HAS_MUJOCO = False
+
 import pytest
 import tempfile
 from pathlib import Path
@@ -45,6 +51,7 @@ def test_workspace(tmp_path):
 
     return scenario
 
+@pytest.mark.skipif(not HAS_MUJOCO, reason="MuJoCo is required for this test")
 def test_execution_orchestrator(test_workspace):
     orchestrator = ExecutionOrchestrator()
     result = orchestrator.run_scenario(test_workspace)

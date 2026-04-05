@@ -1,4 +1,8 @@
-import mujoco
+try:
+    import mujoco
+    HAS_MUJOCO = True
+except ImportError:
+    HAS_MUJOCO = False
 from typing import Any
 from pathlib import Path
 from hrtf.adapters.base import SimulatorAdapter
@@ -22,6 +26,8 @@ class MuJoCoAdapter(SimulatorAdapter):
         pass
 
     def load_robot(self, model: RobotModel, pose: Pose) -> None:
+        if not HAS_MUJOCO:
+            raise RuntimeError("MuJoCo is not installed.")
         try:
             self._model = mujoco.MjModel.from_xml_path(str(model.urdf_path))
         except Exception as e:
