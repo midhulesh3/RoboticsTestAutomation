@@ -22,6 +22,9 @@ dependencies = [
 [project.scripts]
 hrtf = "hrtf.cli.main:cli"
 
+[tool.setuptools.packages.find]
+include = ["hrtf*"]
+
 [project.entry-points."hrtf.adapters"]
 gazebo = "hrtf.adapters.gazebo:GazeboHarmonicAdapter"
 mujoco = "hrtf.adapters.mujoco:MuJoCoAdapter"

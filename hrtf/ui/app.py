@@ -10,9 +10,9 @@ from hrtf.execution.orchestrator import ExecutionOrchestrator
 from hrtf.scenario.composer import compose
 from hrtf.baselines.manager import BaselineManager
 
-st.set_page_config(page_title="HRTF Dashboard", layout="wide")
+st.set_page_config(page_title="HRTF Dashboard", layout="wide", page_icon="🤖")
 
-st.title("Humanoid Robot Test Framework")
+st.title("🤖 Humanoid Robot Test Framework")
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -91,34 +91,42 @@ def _save_result(result) -> Path:
 def _show_result(result):
     """Display a ScenarioResult in the UI."""
     if result.verdict.value == "PASS":
-        st.success(f"**{result.verdict.value}** — {result.scenario_name}")
+        st.success(f"**{result.verdict.value}** — {result.scenario_name}", icon="✅")
     elif result.verdict.value == "FAIL":
-        st.error(f"**{result.verdict.value}** — {result.scenario_name}")
+        st.error(f"**{result.verdict.value}** — {result.scenario_name}", icon="❌")
     else:
-        st.warning(f"**{result.verdict.value}** — {result.error_message}")
+        st.warning(f"**{result.verdict.value}** — {result.error_message}", icon="⚠️")
+
+    c1, c2 = st.columns(2)
+    c1.metric("⏱️ Wall-clock Duration", f"{result.wall_clock_duration:.2f}s")
+    c2.metric("⏱️ Sim Duration", f"{result.sim_duration}s")
 
     if result.assertion_results:
+        st.subheader("Assertions")
         for a in result.assertion_results:
-            if a.verdict.value == "PASS":
-                st.write(f"  :white_check_mark: **{a.assertion_type}** on `{a.signal_name}`")
-            else:
-                detail = ""
-                if a.violation_value is not None:
-                    detail = f" (got {a.violation_value:.4f}, bound {a.expected_bound})"
-                st.write(f"  :x: **{a.assertion_type}** on `{a.signal_name}`{detail}")
+            with st.container(border=True):
+                if a.verdict.value == "PASS":
+                    st.write(f"✅ **{a.assertion_type}** on `{a.signal_name}`")
+                else:
+                    detail = ""
+                    if a.violation_value is not None:
+                        detail = f" (got {a.violation_value:.4f}, bound {a.expected_bound})"
+                    st.write(f"❌ **{a.assertion_type}** on `{a.signal_name}`{detail}")
     else:
         st.info("No assertions were evaluated.")
-
-    st.caption(f"Wall-clock: {result.wall_clock_duration:.2f}s | Sim duration: {result.sim_duration}s")
 
 
 # ---------------------------------------------------------------------------
 # Sidebar navigation
 # ---------------------------------------------------------------------------
 
+st.sidebar.title("🤖 HRTF")
+st.sidebar.divider()
+
 page = st.sidebar.radio(
     "Navigation",
     ["Run Test", "Fixtures", "Test Cases", "Run Settings", "Legacy Scenarios", "View Reports", "Baselines"],
+    label_visibility="collapsed"
 )
 
 # ---------------------------------------------------------------------------
@@ -140,49 +148,53 @@ if page == "Run Test":
     elif not run_settings_files:
         st.info("No run settings found. Add `.yaml` files to the `run_settings/` directory.")
     else:
-        col1, col2, col3 = st.columns(3)
+        with st.container(border=True):
+            st.subheader("Test Configuration")
+            col1, col2, col3 = st.columns(3)
 
-        with col1:
-            st.subheader("Fixture")
-            selected_fixture = st.selectbox(
-                "Robot setup",
-                fixture_files,
-                format_func=lambda p: _read_yaml_name(p),
-                key="fixture_select",
-            )
-            with st.expander("Fixture details"):
-                st.code(selected_fixture.read_text(), language="yaml")
+            with col1:
+                selected_fixture = st.selectbox(
+                    "🤖 Fixture (Robot Setup)",
+                    fixture_files,
+                    format_func=lambda p: _read_yaml_name(p),
+                    key="fixture_select",
+                )
+                with st.expander("Details"):
+                    st.code(selected_fixture.read_text(), language="yaml")
 
-        with col2:
-            st.subheader("Test Case")
-            selected_test_case = st.selectbox(
-                "What to test",
-                test_case_files,
-                format_func=lambda p: _read_yaml_name(p),
-                key="test_case_select",
-            )
-            with st.expander("Test case details"):
-                st.code(selected_test_case.read_text(), language="yaml")
+            with col2:
+                selected_test_case = st.selectbox(
+                    "🧪 Test Case",
+                    test_case_files,
+                    format_func=lambda p: _read_yaml_name(p),
+                    key="test_case_select",
+                )
+                with st.expander("Details"):
+                    st.code(selected_test_case.read_text(), language="yaml")
 
-        with col3:
-            st.subheader("Run Settings")
-            selected_run_settings = st.selectbox(
-                "Simulator config",
-                run_settings_files,
-                format_func=lambda p: _read_yaml_name(p),
-                key="run_settings_select",
-            )
-            with st.expander("Run settings details"):
-                st.code(selected_run_settings.read_text(), language="yaml")
+            with col3:
+                selected_run_settings = st.selectbox(
+                    "⚙️ Run Settings",
+                    run_settings_files,
+                    format_func=lambda p: _read_yaml_name(p),
+                    key="run_settings_select",
+                )
+                with st.expander("Details"):
+                    st.code(selected_run_settings.read_text(), language="yaml")
 
         st.divider()
 
-        if st.button("Run Test", type="primary", use_container_width=True):
-            with st.spinner("Composing and executing..."):
+        if st.button("🚀 Run Test", type="primary", use_container_width=True):
+            with st.status("Executing Scenario...", expanded=True) as status:
+                st.write("Composing scenario...")
                 try:
                     config = compose(selected_fixture, selected_test_case, selected_run_settings)
+                    st.write("Running simulation...")
                     orchestrator = ExecutionOrchestrator()
                     result = orchestrator.run_composed(config)
+
+                    status.update(label="Execution Complete", state="complete", expanded=False)
+                    st.toast("Scenario Execution Completed!", icon="✅")
 
                     _show_result(result)
 
@@ -190,6 +202,7 @@ if page == "Run Test":
                     st.caption(f"Report saved: `{report_path}`")
 
                 except Exception as e:
+                    status.update(label="Execution Failed", state="error", expanded=True)
                     st.error(f"Error: {e}")
 
 # ---------------------------------------------------------------------------
@@ -292,49 +305,71 @@ elif page == "View Reports":
 
         try:
             data = json.loads(selected_report.read_text())
-            st.subheader(f"Run: {data.get('run_id')}")
+            st.subheader(f"📊 Run Details: `{data.get('run_id')}`")
 
             verdict = data.get("overall_verdict")
-            if verdict == "PASS":
-                st.success("Overall Verdict: PASS")
-            else:
-                st.error(f"Overall Verdict: {verdict}")
 
-            st.write(f"**Date:** {data.get('timestamp')}")
-            st.write(f"**Duration:** {data.get('total_wall_clock', 0):.2f} seconds")
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                if verdict == "PASS":
+                    st.metric("Overall Verdict", "PASS", "✅")
+                else:
+                    st.metric("Overall Verdict", verdict, "- ❌")
+            with c2:
+                st.metric("Date", data.get('timestamp', '').split('T')[0] if data.get('timestamp') else 'N/A')
+            with c3:
+                st.metric("Duration", f"{data.get('total_wall_clock', 0):.2f}s")
+
+            st.divider()
 
             for s in data.get("scenarios", []):
-                with st.expander(f"Scenario: {s.get('scenario_name')}"):
+                with st.container(border=True):
+                    sc_verdict = s.get("verdict", "UNKNOWN")
+                    sc_icon = "✅" if sc_verdict == "PASS" else "❌"
+                    st.markdown(f"### {sc_icon} Scenario: {s.get('scenario_name')}")
+
+                    c1, c2 = st.columns(2)
+                    c1.metric("Sim Duration", f"{s.get('sim_duration', 0)}s")
+                    c2.metric("Wall Clock", f"{s.get('wall_clock_duration', 0):.2f}s")
+
                     if s.get("error_message"):
-                        st.warning(f"Error: {s.get('error_message')}")
+                        st.error(f"Error: {s.get('error_message')}")
 
                     # Assertion results table
                     assertions = s.get("assertion_results", [])
                     if assertions:
-                        st.write("**Assertions**")
+                        st.markdown("#### Assertions")
                         for a in assertions:
-                            icon = ":white_check_mark:" if a["verdict"] == "PASS" else ":x:"
-                            st.write(f"{icon} **{a['assertion_type']}** on `{a['signal_name']}` — {a['verdict']}")
+                            with st.container(border=True):
+                                icon = "✅" if a["verdict"] == "PASS" else "❌"
+                                detail = f" | Bounds: {a.get('expected_bound')}" if a.get('expected_bound') is not None else ""
+                                violation = f" | Got: {a.get('violation_value'):.4f}" if a.get('violation_value') is not None else ""
+                                st.write(f"{icon} **{a['assertion_type']}** on `{a['signal_name']}` {detail}{violation}")
 
                     # Signal summaries
                     summaries = s.get("signal_summaries", {})
                     if summaries:
-                        st.write("**Signal Summaries**")
+                        st.markdown("#### Signal Summaries")
                         df_data = []
                         for sig, stat in summaries.items():
                             row = {"Signal": sig}
                             row.update(stat)
                             df_data.append(row)
-                        st.dataframe(pd.DataFrame(df_data))
+                        st.dataframe(pd.DataFrame(df_data), use_container_width=True)
 
-                        for sig, stat in summaries.items():
-                            st.write(f"**{sig}**")
-                            chart_data = pd.DataFrame(
-                                [stat["mean"], stat["min"], stat["max"], stat["final_value"]],
-                                index=["mean", "min", "max", "final"],
-                                columns=["Value"],
-                            )
-                            st.bar_chart(chart_data)
+                        with st.expander("Show Signal Charts"):
+                            chart_cols = st.columns(2)
+                            col_idx = 0
+                            for sig, stat in summaries.items():
+                                with chart_cols[col_idx % 2]:
+                                    st.write(f"**{sig}**")
+                                    chart_data = pd.DataFrame(
+                                        [stat["mean"], stat["min"], stat["max"], stat["final_value"]],
+                                        index=["mean", "min", "max", "final"],
+                                        columns=["Value"],
+                                    )
+                                    st.bar_chart(chart_data)
+                                col_idx += 1
         except Exception as e:
             st.error(f"Failed to load report: {e}")
     else:
@@ -353,42 +388,44 @@ elif page == "Baselines":
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("Stored Baselines")
-        if baselines_dir.exists():
-            baselines = [d.name for d in baselines_dir.iterdir() if d.is_dir()]
-            if baselines:
-                for b in baselines:
-                    st.write(f":package: {b}")
+        with st.container(border=True):
+            st.subheader("📦 Stored Baselines")
+            if baselines_dir.exists():
+                baselines = [d.name for d in baselines_dir.iterdir() if d.is_dir()]
+                if baselines:
+                    for b in baselines:
+                        st.markdown(f"- 📦 `{b}`")
+                else:
+                    st.info("No baselines stored.")
             else:
-                st.info("No baselines stored.")
-        else:
-            st.info("No baselines directory found.")
+                st.info("No baselines directory found.")
 
     with col2:
-        st.subheader("Capture New Baseline")
-        if RESULTS_DIR.exists():
-            json_files = sorted(RESULTS_DIR.glob("*.json"), reverse=True)
-            if json_files:
-                run_id_to_capture = st.selectbox(
-                    "Select Run", json_files, format_func=lambda x: x.stem
-                )
-                new_baseline_name = st.text_input("Baseline Name")
+        with st.container(border=True):
+            st.subheader("📸 Capture New Baseline")
+            if RESULTS_DIR.exists():
+                json_files = sorted(RESULTS_DIR.glob("*.json"), reverse=True)
+                if json_files:
+                    run_id_to_capture = st.selectbox(
+                        "Select Run to Capture", json_files, format_func=lambda x: x.stem
+                    )
+                    new_baseline_name = st.text_input("New Baseline Name")
 
-                if st.button("Capture Baseline"):
-                    if new_baseline_name:
-                        try:
-                            manager.capture(
-                                run_id_to_capture.stem,
-                                new_baseline_name,
-                                results_dir=RESULTS_DIR,
-                            )
-                            st.success(f"Captured {new_baseline_name} successfully!")
-                            st.rerun()
-                        except Exception as e:
-                            st.error(f"Failed to capture: {e}")
-                    else:
-                        st.warning("Please provide a baseline name.")
+                    if st.button("Capture Baseline", type="primary", use_container_width=True):
+                        if new_baseline_name:
+                            try:
+                                manager.capture(
+                                    run_id_to_capture.stem,
+                                    new_baseline_name,
+                                    results_dir=RESULTS_DIR,
+                                )
+                                st.success(f"Captured '{new_baseline_name}' successfully!", icon="✅")
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Failed to capture: {e}")
+                        else:
+                            st.warning("Please provide a baseline name.", icon="⚠️")
+                else:
+                    st.info("No runs available to capture.")
             else:
                 st.info("No runs available to capture.")
-        else:
-            st.info("No runs available to capture.")
