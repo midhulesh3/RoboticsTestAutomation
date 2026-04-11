@@ -22,3 +22,9 @@ All core features for the MVP have been implemented:
 - Add support for custom assertion entry points.
 - Implement fleet-level baseline aggregation.
 - Add support for named test suites.
+**Phase 2 UI Redesign - Stitch Design Generation (Completed)**
+1. Created an engineering-focused custom Design System via Stitch MCP with Dark Mode, Inter Font, and specific technical colors.
+2. Generated 3 key mockups/screens via Stitch MCP using text prompts:
+   - Scenario Composition (Builder) Workspace
+   - Deep-Dive Analysis (Single-run Report)
+   - Regression & Baseline Management
