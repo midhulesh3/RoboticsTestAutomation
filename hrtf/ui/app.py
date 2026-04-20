@@ -125,7 +125,18 @@ st.sidebar.divider()
 
 page = st.sidebar.radio(
     "Navigation",
-    ["Run Test", "Fixtures", "Test Cases", "Run Settings", "Legacy Scenarios", "View Reports", "Baselines"],
+    [
+        "Run Test",
+        "Fixtures",
+        "Edit Fixture",
+        "Test Cases",
+        "Edit Test Case",
+        "Run Settings",
+        "Edit Run Settings",
+        "Legacy Scenarios",
+        "View Reports",
+        "Baselines"
+    ],
     label_visibility="collapsed"
 )
 
@@ -223,6 +234,49 @@ elif page == "Fixtures":
         st.info("No fixtures found. Add `.yaml` files to `fixtures/`.")
 
 # ---------------------------------------------------------------------------
+# Page: Edit Fixture
+# ---------------------------------------------------------------------------
+
+elif page == "Edit Fixture":
+    st.header("Edit Fixture")
+    st.write("Create or edit a fixture YAML file.")
+
+    FIXTURES_DIR.mkdir(exist_ok=True)
+    fixture_files = _list_yamls(FIXTURES_DIR)
+
+    file_options = ["<Create New>"] + [f.name for f in fixture_files]
+    selected_file = st.selectbox("Select File", file_options)
+
+    if selected_file == "<Create New>":
+        new_filename = st.text_input("New Filename", value="new_fixture.yaml")
+        if not new_filename.endswith(".yaml"):
+            new_filename += ".yaml"
+        current_path = FIXTURES_DIR / new_filename
+        default_content = "fixture:\n  name: \"New Fixture\"\n  robot:\n    model: \"\"\n  initial_conditions:\n    pose:\n      position: [0.0, 0.0, 0.0]\n      orientation: [0.0, 0.0, 0.0, 1.0]"
+    else:
+        current_path = FIXTURES_DIR / selected_file
+        new_filename = selected_file
+        if current_path.exists():
+            default_content = current_path.read_text()
+        else:
+            default_content = ""
+
+    content = st.text_area("YAML Content", value=default_content, height=400)
+
+    if st.button("Save Fixture", type="primary"):
+        if selected_file == "<Create New>" and not new_filename:
+            st.error("Please provide a filename.")
+        else:
+            save_path = FIXTURES_DIR / new_filename
+            try:
+                # Basic YAML validation before saving
+                yaml.safe_load(content)
+                save_path.write_text(content)
+                st.success(f"Successfully saved to `{save_path}`!", icon="✅")
+            except Exception as e:
+                st.error(f"Invalid YAML format: {e}")
+
+# ---------------------------------------------------------------------------
 # Page: Test Cases
 # ---------------------------------------------------------------------------
 
@@ -240,6 +294,48 @@ elif page == "Test Cases":
         st.info("No test cases found. Add `.yaml` files to `test_cases/`.")
 
 # ---------------------------------------------------------------------------
+# Page: Edit Test Case
+# ---------------------------------------------------------------------------
+
+elif page == "Edit Test Case":
+    st.header("Edit Test Case")
+    st.write("Create or edit a test case YAML file.")
+
+    TEST_CASES_DIR.mkdir(exist_ok=True)
+    test_case_files = _list_yamls(TEST_CASES_DIR)
+
+    file_options = ["<Create New>"] + [f.name for f in test_case_files]
+    selected_file = st.selectbox("Select File", file_options)
+
+    if selected_file == "<Create New>":
+        new_filename = st.text_input("New Filename", value="new_test_case.yaml")
+        if not new_filename.endswith(".yaml"):
+            new_filename += ".yaml"
+        current_path = TEST_CASES_DIR / new_filename
+        default_content = "test_case:\n  name: \"New Test Case\"\n  duration: 5.0\n  disturbance: []\n  assertions: []"
+    else:
+        current_path = TEST_CASES_DIR / selected_file
+        new_filename = selected_file
+        if current_path.exists():
+            default_content = current_path.read_text()
+        else:
+            default_content = ""
+
+    content = st.text_area("YAML Content", value=default_content, height=400)
+
+    if st.button("Save Test Case", type="primary"):
+        if selected_file == "<Create New>" and not new_filename:
+            st.error("Please provide a filename.")
+        else:
+            save_path = TEST_CASES_DIR / new_filename
+            try:
+                yaml.safe_load(content)
+                save_path.write_text(content)
+                st.success(f"Successfully saved to `{save_path}`!", icon="✅")
+            except Exception as e:
+                st.error(f"Invalid YAML format: {e}")
+
+# ---------------------------------------------------------------------------
 # Page: Run Settings
 # ---------------------------------------------------------------------------
 
@@ -255,6 +351,48 @@ elif page == "Run Settings":
                 st.code(rs.read_text(), language="yaml")
     else:
         st.info("No run settings found. Add `.yaml` files to `run_settings/`.")
+
+# ---------------------------------------------------------------------------
+# Page: Edit Run Settings
+# ---------------------------------------------------------------------------
+
+elif page == "Edit Run Settings":
+    st.header("Edit Run Settings")
+    st.write("Create or edit a run settings YAML file.")
+
+    RUN_SETTINGS_DIR.mkdir(exist_ok=True)
+    run_settings_files = _list_yamls(RUN_SETTINGS_DIR)
+
+    file_options = ["<Create New>"] + [f.name for f in run_settings_files]
+    selected_file = st.selectbox("Select File", file_options)
+
+    if selected_file == "<Create New>":
+        new_filename = st.text_input("New Filename", value="new_run_settings.yaml")
+        if not new_filename.endswith(".yaml"):
+            new_filename += ".yaml"
+        current_path = RUN_SETTINGS_DIR / new_filename
+        default_content = "run_settings:\n  name: \"New Run Settings\"\n  simulator:\n    backend: \"mujoco\"\n    seed: 42\n    step_size: 0.002\n    real_time_factor: 0.0"
+    else:
+        current_path = RUN_SETTINGS_DIR / selected_file
+        new_filename = selected_file
+        if current_path.exists():
+            default_content = current_path.read_text()
+        else:
+            default_content = ""
+
+    content = st.text_area("YAML Content", value=default_content, height=400)
+
+    if st.button("Save Run Settings", type="primary"):
+        if selected_file == "<Create New>" and not new_filename:
+            st.error("Please provide a filename.")
+        else:
+            save_path = RUN_SETTINGS_DIR / new_filename
+            try:
+                yaml.safe_load(content)
+                save_path.write_text(content)
+                st.success(f"Successfully saved to `{save_path}`!", icon="✅")
+            except Exception as e:
+                st.error(f"Invalid YAML format: {e}")
 
 # ---------------------------------------------------------------------------
 # Page: Legacy Scenarios (monolithic YAML — backward compat)

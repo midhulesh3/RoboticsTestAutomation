@@ -21,16 +21,19 @@ class EnhancedJSONEncoder(json.JSONEncoder):
         return super().default(o)
 
 
+from hrtf.scenario.composer import compose
+
 @click.command()
-@click.argument('scenario_path', type=click.Path(exists=True))
+@click.argument('scenario_path', type=click.Path(exists=True), required=False)
+@click.option('--fixture', type=click.Path(exists=True), help='Path to fixture YAML')
+@click.option('--test-case', type=click.Path(exists=True), help='Path to test case YAML')
+@click.option('--run-settings', type=click.Path(exists=True), help='Path to run settings YAML')
 @click.option('--sim', default=None, help='Simulator backend (overrides scenario YAML)')
 @click.option('--seed', type=int, default=None, help='Random seed (overrides scenario YAML)')
 @click.option('--output-dir', type=click.Path(), default='results', help='Output directory')
 @click.option('--param', '-p', multiple=True, help='Parameter override in key=value format (e.g. -p duration=10.0)')
-def run(scenario_path, sim, seed, output_dir, param):
-    """Execute a scenario."""
-    path = Path(scenario_path)
-
+def run(scenario_path, fixture, test_case, run_settings, sim, seed, output_dir, param):
+    """Execute a scenario (monolithic or composed)."""
     # Build parameter overrides from CLI flags
     overrides = {}
     if sim:
@@ -42,10 +45,20 @@ def run(scenario_path, sim, seed, output_dir, param):
             key, value = p.split("=", 1)
             overrides[key] = value
 
-    click.echo(f"Running scenario: {path.name}")
-
     orchestrator = ExecutionOrchestrator()
-    scenario_result = orchestrator.run_scenario(path, param_overrides=overrides if overrides else None)
+    scenario_result = None
+
+    if fixture and test_case and run_settings:
+        click.echo(f"Running composed scenario from {fixture}, {test_case}, {run_settings}")
+        config = compose(Path(fixture), Path(test_case), Path(run_settings), param_overrides=overrides if overrides else None)
+        scenario_result = orchestrator.run_composed(config)
+    elif scenario_path:
+        path = Path(scenario_path)
+        click.echo(f"Running scenario: {path.name}")
+        scenario_result = orchestrator.run_scenario(path, param_overrides=overrides if overrides else None)
+    else:
+        click.echo(click.style("ERROR: Must provide either scenario_path or all of --fixture, --test-case, and --run-settings.", fg="red", bold=True))
+        sys.exit(3)
 
     run_id = f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     run_res = RunResult(
